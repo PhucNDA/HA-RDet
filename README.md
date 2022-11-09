@@ -47,4 +47,15 @@ High-quality detection HA-RDet
     │   ├── HRSC
     │   │   ├── ImageSets
     │   │   ├── FullDataSets
+Cloning repositories
+```python
+!git clone https://github.com/PhucNDA/HA-RDet.git
+```
+Install dependencies
+```python
+!pip install openmim
+!mim install mmdet==2.25.0
+!mim install mmrotate
+```
+## Training model
 
