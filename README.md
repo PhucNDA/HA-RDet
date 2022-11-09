@@ -16,26 +16,26 @@ Oriented object detection in aerial images gains significant attention in comput
 Baseline HA-RDet
 | Model        | Backbone             | MS  |Rotate|mAP    |configs|
 |--------------|:--------------------:|:---:|:----:|:-----:|:---------------------------------------------:|
-|HA-RDet       |ResNet50+FPN          |  -  |   -  |75.408 |[configs](../HARDet/HA-RDet.py)                |
-|HA-RDet       |ReResNet50+ReFPN      |  -  |   -  |75.676 |[configs](../HARDet/HA-RDet-reresnet.py)       |
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |77.012 |[configs](../HARDet/HA-RDet-resnext101.py)     |
+|HA-RDet       |ResNet50+FPN          |  -  |   -  |75.408 |[configs](configs/HARDet/HA-RDet.py)                |
+|HA-RDet       |ReResNet50+ReFPN      |  -  |   -  |75.676 |[configs](configs/HARDet/HA-RDet-reresnet.py)       |
+|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |77.012 |[configs](configs/HARDet/HA-RDet-resnext101.py)     |
 
 High-quality detection HA-RDet
 | Model                 | Backbone             | MS  |Rotate|mAP    |configs|
 |-----------------------|:--------------------:|:---:|:----:|:-----:|:------------------------------------------------:|
-|Oriented Cascade Head  |ResNet50+FPN          |  -  |   -  |46.64  |[configs](../HARDet/Cascade-HA-RDet.py)           |
-|Oriented Dynamic Head  |ResNet50+FPN          |  -  |   -  |47.71  |[configs](../HARDet/HA-RDet-dynamictranning_05.py)|
+|Oriented Cascade Head  |ResNet50+FPN          |  -  |   -  |46.64  |[configs](configs/HARDet/Cascade-HA-RDet.py)           |
+|Oriented Dynamic Head  |ResNet50+FPN          |  -  |   -  |47.71  |[configs](configs/HARDet/HA-RDet-dynamictranning_05.py)|
 ## DIOR-R dataset
 | Model        | Backbone             | MS  |Rotate|mAP    |configs|
 |--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |65.3   |[configs](../HARDet/HA-RDet-resnext101-dior.py)       |
+|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |65.3   |[configs](configs/HARDet/HA-RDet-resnext101-dior.py)       |
 
 In order to execute DIOR-R dataset, change the dota.py .png to .jpg to retain the training scheme
 
 ## HRSC2016 dataset
 | Model        | Backbone             | MS  |Rotate|mAP    |configs|
 |--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |90.2   |[configs](../HARDet/HA-RDet-resnext101-hrsc.py)       |
+|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |90.2   |[configs](configs/HARDet/HA-RDet-resnext101-hrsc.py)       |
 # Installation
 
 <summary> Data Tree </summary>
