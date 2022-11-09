@@ -29,7 +29,9 @@ High-quality detection HA-RDet
 | Model        | Backbone             | MS  |Rotate|mAP    |configs|
 |--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
 |HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |65.3   |[configs](../HARDet/HA-RDet-resnext101-dior.py)       |
+
 In order to execute DIOR-R dataset, change the dota.py .png to .jpg to retain the training scheme
+
 ## HRSC2016 dataset
 | Model        | Backbone             | MS  |Rotate|mAP    |configs|
 |--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
