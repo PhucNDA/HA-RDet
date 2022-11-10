@@ -48,7 +48,7 @@ In order to execute DIOR-R dataset, change the dota.py .png to .jpg to retain th
     │   ├── split_ss_dota
     │   │   ├── trainval
     │   │   ├── test
-    │   ├── DIOR
+    │   ├── DIOR-R
     │   │   ├── trainval
     │   │   ├── test
     │   ├── HRSC
