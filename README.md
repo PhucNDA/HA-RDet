@@ -64,6 +64,8 @@ Install dependencies
 !mim install mmdet==2.25.0
 !mim install mmrotate
 !mim install mmcv==1.6.0
+%cd HA-RDet
+!pip install -v -e .
 ```
 ## Training Model
 Single GPU
