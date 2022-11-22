@@ -1,9 +1,12 @@
 # HA-RDet
 Hybrid-Anchor Rotation Detector for Oriented Object Detection
 
-<p>
-    <img src="demo_video_cvpp.mp4" alt="Sample Video" style="height: 100%; width: 100%;">
+<p align="right">
+    <video src=https://user-images.githubusercontent.com/108280892/203370570-04c74e03-675a-4514-96be-cc9dc3efc2a8.mp4>
 </p>
+
+
+
 
 ![Alt text](model.png?raw=true "HA-RDet")
 <p>
