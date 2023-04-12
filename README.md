@@ -7,8 +7,6 @@ Hybrid-Anchor Rotation Detector for Oriented Object Detection
 
 
 
-
-![Alt text](model.png?raw=true "HA-RDet")
 <p>
     <img src="vis/z3865684197968_308ee358f67bf793dde41d6337dd0d95.jpg" alt="Sample Image" style="height: 50%; width: 50%;"><img src="vis/z3865684215904_febc774aec478cb0f63f8acdb680b98c.jpg" alt="Sample Image" style="height: 50%; width: 50%;">
 </p>
