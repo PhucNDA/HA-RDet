@@ -18,11 +18,17 @@ from .rotated_rpn_head import RotatedRPNHead
 from .sam_reppoints_head import SAMRepPointsHead
 from .AlignmentRPN import AlignmentRPNHead, StageAlignmentRPNHead
 from .align_rpn_head import StageAlignRPNHead, CascadeAlignRPNHead
+from .orientation_sense_rpn import Orientation1, Orientation2, OrientationSensitiveHead
+from .ropn_head import OrientationSenseStage1, OrientationSenseStage2, RoPNHead
+from .hybrid_anchor_align_rpn_head import HybridAlignRPNHead, HybridCascadeAlignRPNHead
 __all__ = [
     'RotatedAnchorHead', 'RotatedRetinaHead', 'RotatedRPNHead',
     'OrientedRPNHead', 'RotatedRetinaRefineHead', 'ODMRefineHead',
     'KFIoURRetinaHead', 'KFIoURRetinaRefineHead', 'KFIoUODMRefineHead',
     'RotatedRepPointsHead', 'SAMRepPointsHead', 'CSLRRetinaHead',
     'RotatedATSSHead', 'RotatedAnchorFreeHead', 'RotatedFCOSHead',
-    'CSLRFCOSHead', 'AlignmentRPNHead', 'StageAlignmentRPNHead','StageAlignRPNHead', 'CascadeAlignRPNHead'
+    'CSLRFCOSHead', 'AlignmentRPNHead', 'StageAlignmentRPNHead', 'StageAlignRPNHead', 'CascadeAlignRPNHead',
+    'Orientation1', 'Orientation2', 'OrientationSensitiveHead',
+    'OrientationSenseStage1', 'OrientationSenseStage2', 'RoPNHead',
+    'HybridAlignRPNHead', 'HybridCascadeAlignRPNHead'
 ]
