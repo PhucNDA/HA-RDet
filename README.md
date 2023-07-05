@@ -1,99 +1,118 @@
-# HA-RDet
-Hybrid-Anchor Rotation Detector for Oriented Object Detection
+<div align="center">
 
-<p align="right">
-    <video src=https://user-images.githubusercontent.com/108280892/203370570-04c74e03-675a-4514-96be-cc9dc3efc2a8.mp4>
-</p>
+  # Hybrid-Anchor Rotation Detector for Oriented Object Detection
+</div>
 
+![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/hardet_architecture.png)
 
+## Introduction
 
-<p>
-    <img src="vis/z3865684197968_308ee358f67bf793dde41d6337dd0d95.jpg" alt="Sample Image" style="height: 50%; width: 50%;"><img src="vis/z3865684215904_febc774aec478cb0f63f8acdb680b98c.jpg" alt="Sample Image" style="height: 50%; width: 50%;">
-</p>
-<p>
-    <img src="vis/z3865684208827_7d0caf1ea6313f657a9484bf220e8a8f.jpg" alt="Sample Image" style="height: 50%; width: 50%;"><img src="vis/z3865684207235_3aa48664c2e80cd59b726e6d6432607b.jpg" alt="Sample Image" style="height: 50%; width: 50%;">
-</p>
+Oriented object detection in aerial images involves identifying objects with varying sizes and orientations, gaining significant attention in computer vision and pattern recognition. Current state-of-the-art detectors use either two-stage or one-stage approaches and commonly adopt Anchor-based strategies. These methods require a redundant number of generated anchors for training and could be inefficient for the limited computational resources. In contrast, Anchor-free mechanisms are faster processing times by eliminating the need for anchor-related hyperparameters. However, they significantly diminish the number of training samples, excoriating the detection accuracy. To address these limitations, we present a **Hybrid-Anchor Rotation Detector (HA-RDet)** that combines the advantages of both anchor-based and anchor-free schemes for oriented object detection. Our approach utilizes only one preset anchor for each location on the feature maps and refines these anchors using our introduced Orientation-Aware Convolution technique, significantly boosting the detection performance of HA-RDet. We extensively evaluate HA-RDet with ResNet50 on challenging benchmarks and achieve competitive accuracies, such as DOTA-v1 (75.41% mAP), DIOR-R (65.3% mAP), and HRSC2016 (90.2% mAP) against current anchor-based methods while utilizing fewer training resources. We hope our baseline could establish a foundation for further advancements in oriented object detection.
 
-# Introduction
-Oriented object detection in aerial images gains significant attention in computer vision and pattern recognition. Current state-of-the-art two-stage or one-stage methods commonly adopt Anchor-based strategies for region proposal generation using a redundant number of generated anchors for training, which is inefficient for the limited resources. At the same time, Anchor-free approaches are much faster but usually diminish a large number of training samples, excoriating the detection accuracy. In this paper, we present the Hybrid-Anchor Rotation Detector (HA-RDet), which aims to bridge the gap between Anchor-based and Anchor-free schemes for oriented object detection. Extensive experiments of HA-RDet and many other detectors are carried out on many well-known oriented datasets such as DOTA, DIOR-R and HRSC2016. Our HA-RDet achieves state-of-the-art asymptotic results, competitively comparable with current Anchor-based methods, while the training and inference speed is asymptotically similar to Anchor-free competitors.
-# Benchmark and Model Zoo
-## DOTA dataset
-Baseline HA-RDet
-| Model        | Backbone             | MS  |Rotate|mAP    |configs|
-|--------------|:--------------------:|:---:|:----:|:-----:|:---------------------------------------------:|
-|HA-RDet       |ResNet50+FPN          |  -  |   -  |75.408 |[configs](configs/HARDet/HA-RDet.py)                |
-|HA-RDet       |ReResNet50+ReFPN      |  -  |   -  |75.676 |[configs](configs/HARDet/HA-RDet-reresnet.py)       |
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |77.012 |[configs](configs/HARDet/HA-RDet-resnext101.py)     |
+## Installation
 
-High-quality detection HA-RDet
-| Model                 | Backbone             | MS  |Rotate|mAP    |configs|
-|-----------------------|:--------------------:|:---:|:----:|:-----:|:------------------------------------------------:|
-|Oriented Cascade Head  |ResNet50+FPN          |  -  |   -  |46.64  |[configs](configs/HARDet/Cascade-HA-RDet.py)           |
-|Oriented Dynamic Head  |ResNet50+FPN          |  -  |   -  |47.71  |[configs](configs/HARDet/HA-RDet-dynamictranning_05.py)|
-## DIOR-R dataset
-| Model        | Backbone             | MS  |Rotate|mAP    |configs|
-|--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |65.3   |[configs](configs/HARDet/HA-RDet-resnext101-dior.py)       |
+Data preparation and download
+* DOTA-v1.0: <a href="https://captain-whu.github.io/DOTA/dataset.html">download</a>
+* HRSC2016: <a href="https://www.kaggle.com/datasets/guofeng/hrsc2016">download</a>
+* DIOR-R: <a href="https://drive.google.com/drive/folders/1UdlgHk49iu6WpcJ5467iT-UqNPpx__CC">download</a>
 
-In order to execute DIOR-R dataset, change the dota.py .png to .jpg to retain the training scheme
-
-## HRSC2016 dataset
-| Model        | Backbone             | MS  |Rotate|mAP    |configs|
-|--------------|:--------------------:|:---:|:----:|:-----:|:----------------------------------------------------:|
-|HA-RDet       |ResNext101_DCNv2+FPN  |  -  |   -  |90.2   |[configs](configs/HARDet/HA-RDet-resnext101-hrsc.py)       |
-# Installation
-
-<summary> Data Tree </summary>
-
-    HA-RDet
-    ├── mmrotate
-    ├── tools
-    ├── configs
-    ├── data
-    │   ├── split_ss_dota
-    │   │   ├── trainval
-    │   │   ├── test
-    │   ├── DIOR-R
-    │   │   ├── trainval
-    │   │   ├── test
-    │   ├── HRSC
-    │   │   ├── ImageSets
-    │   │   ├── FullDataSets
-Cloning repositories
-```python
-!git clone https://github.com/PhucNDA/HA-RDet.git
 ```
-Install dependencies
-```python
-!pip install openmim
-!mim install mmdet==2.25.0
-!mim install mmrotate
-!mim install mmcv==1.6.0
-%cd HA-RDet
-!pip install -v -e .
-```
-## Training Model
-Single GPU
-```python
-python tools/train.py [configs_file] [optional args]
-```
-Multi GPU
-```python
-./tools/dist_train.sh [configs_file] [GPU_NUMS] [optional args]
+HA-RDet
+├── mmrotate
+├── tools
+├── configs
+├── data
+│   ├── split_ss_dota
+│   │   ├── trainval
+│   │   │    ├── annfiles
+│   │   │    ├── images
+│   │   ├── test
+│   │   │    ├── annfiles
+│   │   │    ├── images
+│   ├── DIOR-R
+│   │   ├── trainval
+│   │   ├── test
+│   ├── HRSC
+│   │   ├── ImageSets
+│   │   ├── FullDataSets
 ```
 
-## Testing Model
-Submit to server: https://captain-whu.github.io/DOTA/evaluation.html
-```python 
+Our experiment relies on the <a href="https://github.com/open-mmlab/mmrotate">MMRotate</a> framework provided by <a href="https://github.com/open-mmlab">Open MMLab</a>.
+MMRotate depends on <a href="https://pytorch.org/">PyTorch</a>, <a href="https://github.com/open-mmlab/mmcv">MMCV</a> and <a href="https://github.com/open-mmlab/mmdetection">MMDetection</a>. Quick steps for installation follows as:
+
+* Git clone
+
+```
+git clone https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector 
+```
+
+* Environment setup
+
+```
+conda create -n [NAME] python=3.7 pytorch==1.7.0 cudatoolkit=10.1 torchvision -c pytorch -y
+conda activate [NAME]
+pip install openmim
+mim install mmcv-full
+mim install mmdet
+cd 'Hybrid-Anchor-Rotation-Detector'
+pip install -r requirements/build.txt
+pip install -v -e .
+```
+
+## Training and Inference
+
+* Training command:
+
+```
+python tools/train.py ${CONFIG_FILE} [optional arguments]
+
+# Example:
+python tools/train.py configs/ha_rdet/hardet_baseline_r50_fpn_1x_dota_le90.py
+```
+
+* Inference command for online submission:
+```
 python ./tools/test.py  \
-  [configs_file] \
-  [checkpoint.pth] --format-only \
-  --eval-options submission_dir=[submission_directories]
+    configs/ha_rdet/hardet_baseline_r50_fpn_1x_dota_le90.py \
+    checkpoints/SOME_CHECKPOINT.pth --format-only \
+    --eval-options submission_dir=[SAVE_FOLDER]
 ```
-Visualization:
 
-    We change the code to omit class name of the oriented bbox
-
-```python
-python tools/test.py [configs_file] --show-dir [visualization_directories]
+* Visualize the results
 ```
+python ./tools/test.py  \
+    configs/ha_rdet/hardet_baseline_r50_fpn_1x_dota_le90.py \
+    checkpoints/SOME_CHECKPOINT.pth
+    --show-dir [SAVE_FOLDER]
+```
+
+## Benchmark and Model Zoo
+
+### DOTA-v1.0 dataset
+
+| Model    |    Backbone       | #anchors              | VRAM (GB) | #params                   | FPS | mAP | Config | Download |
+| ------ |:-------------:|:----------------------:|:-----------------------------------------------------:|:-------------------------:|:----:|:----:|:---:|:--:|
+| S2A-Net| ResNet50+FPN | 1 | 4.6 | ~39M | 15.5 | 74.19 | - | - |
+| Oriented R-CNN| ResNet50+FPN | 20 | 14.2 | ~41M | 13.5 | 75.69 | - | - |
+| **HA-RDet (ours)** | ResNet50+FPN | 1 | 6.8 | ~56M | 12.1 | 75.41 | <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/configs/ha_rdet/hardet_baseline_r50_fpn_1x_dota_le90.py">config</a> | <a href="https://drive.google.com/file/d/1_8xUpm8dX5oypkBCiDuqYolG2u3_KuYW/view?usp=drive_link">model</a> / <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/logs/hardet_baseline_r50_fpn_1x_dota_le90.txt">log</a> |
+| **HA-RDet (ours)** | ResNet101+FPN | 1 | - | - | - | 76.02 | <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/configs/ha_rdet/hardet_baseline_r101_fpn_1x_dota_le90.py">config</a> | <a href="https://drive.google.com/file/d/1Zm7eYrepwAmjJ0TaHti4d6Znn9T4bl__/view?usp=drive_link">model</a> / <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/logs/hardet_baseline_r101_fpn_1x_dota_le90.txt">log</a> |
+| **HA-RDet (ours)** | ResNeXt101_DCNv2+FPN | 1 | - | - | - | 77.012 | <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/configs/ha_rdet/hardet_baseline_rx101_dcn_fpn_1x_dota_le90.py">config</a> | <a href="https://drive.google.com/file/d/1_29jCteJpW-13MxClbZP7eHuRY9HJPTH/view?usp=drive_link">model</a> / <a href="https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/logs/hardet_baseline_rx101_dcn_fpn_1x_dota_le90.txt">log</a> |
+
+### HRSC2016
+
+| Model | Backbone | #anchors | mAP (VOC 07) | mAP (VOC 12) |
+|:-----:|:--------:|:-------:|:-------:|:-------:|
+| S2A-Net | ResNet101+FPN | 1 | 90.17 | 95.01 |
+| AOPG | ResNet101+FPN | 1 | 90.34 | 96.22 |
+| **HA-RDet (ours)** | ResNeXt101_DCNv2+FPN | 1 | 90.2 | 95.32 |
+
+### DIOR-R
+| Model | Backbone | mAP |
+|:-----:|:--------:|:---:|
+| HA-RDet | ResNeXt101_DCNv2+FPN | 65.3 |
+
+## Visualization
+|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0014__1024__0___0.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0182__1024__0___1109.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0017__1024__0___1648.png)|
+|-|-|-|
+|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0031__1024__2472___0.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0031__1024__2472___1648.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0045__1024__0___0.png)|
+|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0051__1024__3296___1648.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0132__1024__0___0.png)|![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/vis/P0145__1024__161___169.png)|

@@ -1,11 +1,11 @@
-dataset_type = 'HRSCDataset'
-data_root = 'data/hrsc/'
+dataset_type = 'DOTADataset'
+data_root = 'data/split_1024_dota1_0/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='RResize', img_scale=(800, 800)),
+    dict(type='RResize', img_scale=(1024, 1024)),
     dict(
         type='RRandomFlip',
         flip_ratio=[0.25, 0.25, 0.25],
@@ -24,7 +24,7 @@ test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=(800, 800),
+        img_scale=(1024, 1024),
         flip=False,
         transforms=[
             dict(type='RResize'),
@@ -42,15 +42,13 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
-        type='HRSCDataset',
-        classwise=False,
-        ann_file='data/HRSC2016/ImageSets/trainval.txt',
-        img_subdir='data/HRSC2016/FullDataSet/AllImages/',
-        img_prefix='data/HRSC2016/FullDataSet/AllImages/',
+        type='DOTADataset',
+        ann_file='data/split_ss_dota/trainval/annfiles/',
+        img_prefix='data/split_ss_dota/trainval/images/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(type='LoadAnnotations', with_bbox=True),
-            dict(type='RResize', img_scale=(800, 800)),
+            dict(type='RResize', img_scale=(1024, 1024)),
             dict(
                 type='RRandomFlip',
                 flip_ratio=[0.25, 0.25, 0.25],
@@ -67,16 +65,14 @@ data = dict(
         ],
         version='le90'),
     val=dict(
-        type='HRSCDataset',
-        classwise=False,
-        ann_file='data/HRSC2016/ImageSets/test.txt',
-        img_subdir='data/HRSC2016/FullDataSet/AllImages/',
-        img_prefix='data/HRSC2016/FullDataSet/AllImages/',
+        type='DOTADataset',
+        ann_file='data/split_ss_dota/trainval/annfiles/',
+        img_prefix='data/split_ss_dota/trainval/images/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(800, 800),
+                img_scale=(1024, 1024),
                 flip=False,
                 transforms=[
                     dict(type='RResize'),
@@ -92,16 +88,14 @@ data = dict(
         ],
         version='le90'),
     test=dict(
-        type='HRSCDataset',
-        classwise=False,
-        ann_file='data/HRSC2016/ImageSets/test.txt',
-        img_subdir='data/HRSC2016/FullDataSet/AllImages/',
-        img_prefix='data/HRSC2016/FullDataSet/AllImages/',
+        type='DOTADataset',
+        ann_file='data/split_ss_dota/test/images/',
+        img_prefix='data/split_ss_dota/test/images/',
         pipeline=[
             dict(type='LoadImageFromFile'),
             dict(
                 type='MultiScaleFlipAug',
-                img_scale=(800, 800),
+                img_scale=(1024, 1024),
                 flip=False,
                 transforms=[
                     dict(type='RResize'),
@@ -116,7 +110,7 @@ data = dict(
                 ])
         ],
         version='le90'))
-evaluation = dict(interval=1, metric='mAP', save_best='mAP')
+evaluation = dict(interval=12, metric='mAP', save_best='mAP')
 optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 lr_config = dict(
@@ -125,7 +119,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=0.3333333333333333,
     step=[8, 11])
-runner = dict(type='EpochBasedRunner', max_epochs=36)
+runner = dict(type='EpochBasedRunner', max_epochs=24)
 checkpoint_config = dict(interval=1)
 log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
 dist_params = dict(backend='nccl')
@@ -137,10 +131,9 @@ opencv_num_threads = 0
 mp_start_method = 'fork'
 angle_version = 'le90'
 model = dict(
-    type='RoITransformer',
-    pretrained='open-mmlab://resnext101_64x4d',
+    type='HARDet',
     backbone=dict(
-        type='ResNeXt',
+        type='ResNet',
         depth=101,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
@@ -148,17 +141,15 @@ model = dict(
         norm_cfg=dict(type='BN', requires_grad=True),
         norm_eval=True,
         style='pytorch',
-        groups=64,
-        base_width=4,
-        dcn=dict(type='DCNv2', deform_groups=4, fallback_on_stride=False),
-        stage_with_dcn=(False, True, True, True)),
+        init_cfg=dict(type='Pretrained',
+                      checkpoint='torchvision://resnet101')),
     neck=dict(
         type='FPN',
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
         num_outs=5),
     rpn_head=dict(
-        type='CascadeAlignRPNHead',
+        type='HybridAnchorRPNHead',
         num_stages=2,
         stages=[
             dict(
@@ -199,7 +190,7 @@ model = dict(
                 loss_bbox=dict(type='IoULoss', linear=True, loss_weight=7.0))
         ]),
     roi_head=dict(
-        type='HARDet',
+        type='RoITransRoIHead',
         version='le90',
         num_stages=2,
         stage_loss_weights=[1, 1],
@@ -213,28 +204,27 @@ model = dict(
             dict(
                 type='RotatedSingleRoIExtractor',
                 roi_layer=dict(
-                    type='RiRoIAlignRotated',
+                    type='RoIAlignRotated',
                     out_size=7,
-                    num_samples=2,
-                    num_orientations=8,
+                    sample_num=2,
                     clockwise=True),
                 out_channels=256,
                 featmap_strides=[4, 8, 16, 32])
         ],
         bbox_head=[
             dict(
-                type='MidpointRotatedShared2FCBBoxHead',
+                type='RotatedShared2FCBBoxHead',
                 in_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
-                num_classes=1,
+                num_classes=15,
                 bbox_coder=dict(
-                    type='MidpointOffsetCoder',
+                    type='DeltaXYWHAHBBoxCoder',
                     angle_range='le90',
-                    # norm_factor=2,
-                    # edge_swap=True,
-                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    target_stds=[0.1, 0.1, 0.2, 0.2, 0.1, 0.1]),
+                    norm_factor=2,
+                    edge_swap=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
@@ -243,27 +233,25 @@ model = dict(
                 loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
                                loss_weight=1.0)),
             dict(
-                type='RotatedConvFCBBoxHead',
-                num_cls_fcs=2,
-                num_reg_convs=4,
+                type='RotatedShared2FCBBoxHead',
                 in_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
-                num_classes=1,
+                num_classes=15,
                 bbox_coder=dict(
                     type='DeltaXYWHAOBBoxCoder',
                     angle_range='le90',
                     norm_factor=None,
                     edge_swap=True,
                     proj_xy=True,
-                    target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
                     target_stds=[0.05, 0.05, 0.1, 0.1, 0.5]),
-                reg_class_agnostic=True,
+                reg_class_agnostic=False,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
                     use_sigmoid=False,
-                    loss_weight=2.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=2.0))
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
         ]),
     train_cfg=dict(
         rpn=[
@@ -343,6 +331,6 @@ model = dict(
             score_thr=0.05,
             nms=dict(type='le90', iou_thr=0.1),
             max_per_img=2000)))
-work_dir = './work_dirs/HA-RDet-resnext101-hrsc'
+work_dir = './work_dirs/hardet_baseline_r101_fpn_1x_dota_le90'
 auto_resume = False
 gpu_ids = range(0, 1)

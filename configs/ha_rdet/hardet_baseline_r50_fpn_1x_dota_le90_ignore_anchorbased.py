@@ -110,7 +110,7 @@ data = dict(
                 ])
         ],
         version='le90'))
-evaluation = dict(interval=12, metric='mAP', save_best='mAP')
+evaluation = dict(interval=24, metric='mAP', save_best='mAP')
 optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 lr_config = dict(
@@ -131,23 +131,25 @@ opencv_num_threads = 0
 mp_start_method = 'fork'
 angle_version = 'le90'
 model = dict(
-    type='RoITransformer',
+    type='HARDet',
     backbone=dict(
-        type='ReResNet',
+        type='ResNet',
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
+        norm_cfg=dict(type='BN', requires_grad=True),
+        norm_eval=True,
         style='pytorch',
-        pretrained='data/re_resnet50_c8_batch256-25b16846.pth'),
+        init_cfg=dict(type='Pretrained', checkpoint='torchvision://resnet50')),
     neck=dict(
-        type='ReFPN',
+        type='FPN',
         in_channels=[256, 512, 1024, 2048],
         out_channels=256,
         num_outs=5),
     rpn_head=dict(
-        type='CascadeAlignRPNHead',
-        num_stages=2,
+        type='HybridAnchorRPNHead',
+        num_stages=1,
         stages=[
             dict(
                 type='StageAlignRPNHead',
@@ -155,39 +157,22 @@ model = dict(
                 feat_channels=256,
                 anchor_generator=dict(
                     type='AnchorGenerator',
-                    scales=[6],
+                    scales=[4],
                     ratios=[1.0],
                     strides=[4, 8, 16, 32, 64]),
                 adapt_cfg=dict(type='dilation', dilation=3),
                 bridged_feature=True,
                 sampling=False,
-                with_cls=False,
-                reg_decoded_bbox=True,
-                bbox_coder=dict(
-                    type='DeltaXYWHBBoxCoder',
-                    target_means=(0.0, 0.0, 0.0, 0.0),
-                    target_stds=(0.1, 0.1, 0.5, 0.5)),
-                loss_bbox=dict(type='IoULoss', linear=True, loss_weight=7.0)),
-            dict(
-                type='StageAlignRPNHead',
-                in_channels=256,
-                feat_channels=256,
-                adapt_cfg=dict(type='offset'),
-                bridged_feature=False,
-                sampling=True,
                 with_cls=True,
                 reg_decoded_bbox=True,
                 bbox_coder=dict(
                     type='DeltaXYWHBBoxCoder',
                     target_means=(0.0, 0.0, 0.0, 0.0),
-                    target_stds=(0.05, 0.05, 0.1, 0.1)),
-                loss_cls=dict(
-                    type='CrossEntropyLoss', use_sigmoid=True,
-                    loss_weight=0.7),
+                    target_stds=(0.1, 0.1, 0.5, 0.5)),
                 loss_bbox=dict(type='IoULoss', linear=True, loss_weight=7.0))
         ]),
     roi_head=dict(
-        type='HARDet',
+        type='RoITransRoIHead',
         version='le90',
         num_stages=2,
         stage_loss_weights=[1, 1],
@@ -201,26 +186,27 @@ model = dict(
             dict(
                 type='RotatedSingleRoIExtractor',
                 roi_layer=dict(
-                    type='RiRoIAlignRotated',
+                    type='RoIAlignRotated',
                     out_size=7,
-                    num_samples=2,
-                    num_orientations=8,
+                    sample_num=2,
                     clockwise=True),
                 out_channels=256,
                 featmap_strides=[4, 8, 16, 32])
         ],
         bbox_head=[
             dict(
-                type='MidpointRotatedShared2FCBBoxHead',
+                type='RotatedShared2FCBBoxHead',
                 in_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
                 num_classes=15,
                 bbox_coder=dict(
-                    type='MidpointOffsetCoder',
+                    type='DeltaXYWHAHBBoxCoder',
                     angle_range='le90',
-                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-                    target_stds=[0.1, 0.1, 0.2, 0.2, 0.1, 0.1]),
+                    norm_factor=2,
+                    edge_swap=True,
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2, 1]),
                 reg_class_agnostic=True,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
@@ -229,9 +215,7 @@ model = dict(
                 loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
                                loss_weight=1.0)),
             dict(
-                type='RotatedConvFCBBoxHead',
-                num_cls_fcs=2,
-                num_reg_convs=4,
+                type='RotatedShared2FCBBoxHead',
                 in_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
@@ -242,14 +226,14 @@ model = dict(
                     norm_factor=None,
                     edge_swap=True,
                     proj_xy=True,
-                    target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+                    target_means=[0.0, 0.0, 0.0, 0.0, 0.0],
                     target_stds=[0.05, 0.05, 0.1, 0.1, 0.5]),
-                reg_class_agnostic=True,
+                reg_class_agnostic=False,
                 loss_cls=dict(
                     type='CrossEntropyLoss',
                     use_sigmoid=False,
-                    loss_weight=2.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=2.0))
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
         ]),
     train_cfg=dict(
         rpn=[
@@ -329,6 +313,6 @@ model = dict(
             score_thr=0.05,
             nms=dict(type='le90', iou_thr=0.1),
             max_per_img=2000)))
-work_dir = './work_dirs/HA-RDet-reresnet'
+work_dir = './work_dirs/hardet_baseline_r50_fpn_1x_dota_le90_ignore_anchorbased'
 auto_resume = False
 gpu_ids = range(0, 1)

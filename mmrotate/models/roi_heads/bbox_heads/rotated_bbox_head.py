@@ -1,133 +1,22 @@
+# Copyright (c) OpenMMLab. All rights reserved.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.modules.utils import _pair
-
 from mmcv.runner import BaseModule, auto_fp16, force_fp32
 from mmcv.utils import to_2tuple
 from mmdet.core import multi_apply
-# from mmdet.core import delta2bbox_rotated
 from mmdet.models.losses import accuracy
 from mmdet.models.utils import build_linear_layer
 
-# from mmdet.core import delta2bbox
-# from ..losses import accuracy
-# from ..registry import HEADS
-
 from mmrotate.core import build_bbox_coder, multiclass_nms_rotated
 from ...builder import ROTATED_HEADS, build_loss
-import mmcv
-import numpy as np
-from mmrotate.core.bbox.transform_rotated import delta2bbox_rotated
 
-# @mmcv.jit(coderize=True)
-# def delta2bbox(rois,
-#             deltas,
-#             means=(0., 0., 0., 0., 0.),
-#             stds=(1., 1., 1., 1., 1.),
-#             max_shape=None,
-#             wh_ratio_clip=16 / 1000,
-#             add_ctr_clamp=False,
-#             ctr_clamp=32,
-#             angle_range='oc',
-#             norm_factor=None,
-#             edge_swap=False,
-#             proj_xy=False):
-#     """Apply deltas to shift/scale base boxes. Typically the rois are anchor
-#     or proposed bounding boxes and the deltas are network outputs used to
-#     shift/scale those boxes. This is the inverse function of
-#     :func:`bbox2delta`.
-#     Args:
-#         rois (torch.Tensor): Boxes to be transformed. Has shape (N, 5).
-#         deltas (torch.Tensor): Encoded offsets relative to each roi.
-#             Has shape (N, num_classes * 5) or (N, 5). Note
-#             N = num_base_anchors * W * H, when rois is a grid of
-#             anchors.
-#         means (Sequence[float]): Denormalizing means for delta coordinates.
-#             Default (0., 0., 0., 0., 0.).
-#         stds (Sequence[float]): Denormalizing standard deviation for delta
-#             coordinates. Default (1., 1., 1., 1., 1.).
-#         max_shape (Sequence[int] or torch.Tensor or Sequence[
-#             Sequence[int]],optional): Maximum bounds for boxes, specifies
-#         (H, W, C) or (H, W). If bboxes shape is (B, N, 5), then
-#         the max_shape should be a Sequence[Sequence[int]]
-#         and the length of max_shape should also be B.
-#         wh_ratio_clip (float): Maximum aspect ratio for boxes. Default
-#             16 / 1000.
-#         add_ctr_clamp (bool): Whether to add center clamp, when added, the
-#             predicted box is clamped is its center is too far away from
-#             the original anchor's center. Only used by YOLOF. Default False.
-#         ctr_clamp (int): the maximum pixel shift to clamp. Only used by
-#             YOLOF. Default 32.
-#         angle_range (str, optional): Angle representations. Defaults to 'oc'.
-#         norm_factor (None|float, optional): Regularization factor of angle.
-#         edge_swap (bool, optional): Whether swap the edge if w < h.
-#             Defaults to False.
-#         proj_xy (bool, optional): Whether project x and y according to angle.
-#             Defaults to False.
-#     Returns:
-#         Tensor: Boxes with shape (N, num_classes * 5) or (N, 5), where 5
-#         represent cx, cy, w, h, a.
-#     """
-#     means = deltas.new_tensor(means).view(1, -1).repeat(1, deltas.size(1) // 5)
-#     stds = deltas.new_tensor(stds).view(1, -1).repeat(1, deltas.size(1) // 5)
-#     denorm_deltas = deltas * stds + means
-#     dx = denorm_deltas[:, 0::5]
-#     dy = denorm_deltas[:, 1::5]
-#     dw = denorm_deltas[:, 2::5]
-#     dh = denorm_deltas[:, 3::5]
-#     da = denorm_deltas[:, 4::5]
-#     if norm_factor:
-#         da *= norm_factor * np.pi
-#     # Compute center of each roi
-#     px = rois[:, 0].unsqueeze(1).expand_as(dx)
-#     py = rois[:, 1].unsqueeze(1).expand_as(dy)
-#     # Compute width/height of each roi
-#     pw = rois[:, 2].unsqueeze(1).expand_as(dw)
-#     ph = rois[:, 3].unsqueeze(1).expand_as(dh)
-#     # Compute rotated angle of each roi
-#     pa = rois[:, 4].unsqueeze(1).expand_as(da)
-#     dx_width = pw * dx
-#     dy_height = ph * dy
-#     max_ratio = np.abs(np.log(wh_ratio_clip))
-#     if add_ctr_clamp:
-#         dx_width = torch.clamp(dx_width, max=ctr_clamp, min=-ctr_clamp)
-#         dy_height = torch.clamp(dy_height, max=ctr_clamp, min=-ctr_clamp)
-#         dw = torch.clamp(dw, max=max_ratio)
-#         dh = torch.clamp(dh, max=max_ratio)
-#     else:
-#         dw = dw.clamp(min=-max_ratio, max=max_ratio)
-#         dh = dh.clamp(min=-max_ratio, max=max_ratio)
-#     # Use exp(network energy) to enlarge/shrink each roi
-#     gw = pw * dw.exp()
-#     gh = ph * dh.exp()
-#     # Use network energy to shift the center of each roi
-#     if proj_xy:
-#         gx = dx * pw * torch.cos(pa) - dy * ph * torch.sin(pa) + px
-#         gy = dx * pw * torch.sin(pa) + dy * ph * torch.cos(pa) + py
-#     else:
-#         gx = px + dx_width
-#         gy = py + dy_height
-#     # Compute angle
-#     ga = norm_angle(pa + da, angle_range)
-#     if max_shape is not None:
-#         gx = gx.clamp(min=0, max=max_shape[1] - 1)
-#         gy = gy.clamp(min=0, max=max_shape[0] - 1)
-
-#     if edge_swap:
-#         w_regular = torch.where(gw > gh, gw, gh)
-#         h_regular = torch.where(gw > gh, gh, gw)
-#         theta_regular = torch.where(gw > gh, ga, ga + np.pi / 2)
-#         theta_regular = norm_angle(theta_regular, angle_range)
-#         return torch.stack([gx, gy, w_regular, h_regular, theta_regular],
-#                         dim=-1).view_as(deltas)
-#     else:
-#         return torch.stack([gx, gy, gw, gh, ga], dim=-1).view(deltas.size())
 
 @ROTATED_HEADS.register_module()
 class RotatedBBoxHead(BaseModule):
     """Simplest RoI head, with only two fc layers for classification and
     regression respectively.
+
     Args:
         with_avg_pool (bool, optional): If True, use ``avg_pool``.
         with_cls (bool, optional): If True, use classification branch.
@@ -184,8 +73,7 @@ class RotatedBBoxHead(BaseModule):
         self.reg_predictor_cfg = reg_predictor_cfg
         self.cls_predictor_cfg = cls_predictor_cfg
         self.fp16_enabled = False
-        self.means=bbox_coder['target_means']
-        self.stds=bbox_coder['target_stds']
+
         self.bbox_coder = build_bbox_coder(bbox_coder)
         self.loss_cls = build_loss(loss_cls)
         self.loss_bbox = build_loss(loss_bbox)
@@ -254,6 +142,7 @@ class RotatedBBoxHead(BaseModule):
                            pos_gt_labels, cfg):
         """Calculate the ground truth for proposals in the single image
         according to the sampling results.
+
         Args:
             pos_bboxes (torch.Tensor): Contains all the positive boxes,
                 has shape (num_pos, 5), the last dimension 5
@@ -267,9 +156,11 @@ class RotatedBBoxHead(BaseModule):
             pos_gt_labels (torch.Tensor): Contains all the gt_labels,
                 has shape (num_gt).
             cfg (obj:`ConfigDict`): `train_cfg` of R-CNN.
+
         Returns:
             Tuple[Tensor]: Ground truth for proposals
             in a single image. Containing the following Tensors:
+
                 - labels(torch.Tensor): Gt_labels for all proposals, has
                   shape (num_proposals,).
                 - label_weights(torch.Tensor): Labels_weights for all
@@ -321,9 +212,11 @@ class RotatedBBoxHead(BaseModule):
                     concat=True):
         """Calculate the ground truth for all samples in a batch according to
         the sampling_results.
+
         Almost the same as the implementation in bbox_head, we passed
         additional parameters pos_inds_list and neg_inds_list to
         `_get_target_single` function.
+
         Args:
             sampling_results (List[obj:SamplingResults]): Assign results of
                 all images in a batch after sampling.
@@ -335,9 +228,11 @@ class RotatedBBoxHead(BaseModule):
             rcnn_train_cfg (obj:ConfigDict): `train_cfg` of RCNN.
             concat (bool): Whether to concatenate the results of all
                 the images in a single batch.
+
         Returns:
             Tuple[Tensor]: Ground truth for proposals in a single image.
             Containing the following list of Tensors:
+
                 - labels (list[Tensor],Tensor): Gt_labels for all
                   proposals in a batch, each tensor in list has
                   shape (num_proposals,) when `concat=False`, otherwise
@@ -376,7 +271,6 @@ class RotatedBBoxHead(BaseModule):
             bbox_weights = torch.cat(bbox_weights, 0)
         return labels, label_weights, bbox_targets, bbox_weights
 
-
     @force_fp32(apply_to=('cls_score', 'bbox_pred'))
     def loss(self,
              cls_score,
@@ -388,6 +282,7 @@ class RotatedBBoxHead(BaseModule):
              bbox_weights,
              reduction_override=None):
         """Loss function.
+
         Args:
             cls_score (torch.Tensor): Box scores, has shape
                 (num_boxes, num_classes + 1).
@@ -469,6 +364,7 @@ class RotatedBBoxHead(BaseModule):
                    rescale=False,
                    cfg=None):
         """Transform network output for a batch into bbox predictions.
+
         Args:
             rois (torch.Tensor): Boxes to be transformed. Has shape
                 (num_boxes, 5). last dimension 5 arrange as
@@ -484,6 +380,7 @@ class RotatedBBoxHead(BaseModule):
             rescale (bool): If True, return boxes in original image space.
                 Default: False.
             cfg (obj:`ConfigDict`): `test_cfg` of Bbox Head. Default: None
+
         Returns:
             tuple[Tensor, Tensor]:
                 First tensor is `det_bboxes`, has the shape
@@ -522,77 +419,10 @@ class RotatedBBoxHead(BaseModule):
                 bboxes, scores, cfg.score_thr, cfg.nms, cfg.max_per_img)
             return det_bboxes, det_labels
 
-    @force_fp32(apply_to=('bbox_preds',))
-    def refine_bboxes1(self, rois, labels, bbox_preds, pos_is_gts, img_metas):
-        """Refine bboxes during training.
-        Args:
-            rois (Tensor): Shape (n*bs, 6), where n is image number per GPU,
-                and bs is the sampled RoIs per image.
-            labels (Tensor): Shape (n*bs, ).
-            bbox_preds (Tensor): Shape (n*bs, 5) or (n*bs, 5*#class).
-            pos_is_gts (list[Tensor]): Flags indicating if each positive bbox
-                is a gt bbox.
-            img_metas (list[dict]): Meta info of each image.
-        Returns:
-            list[Tensor]: Refined bboxes of each image in a mini-batch.
-        """
-        img_ids = rois[:, 0].long().unique(sorted=True)
-        assert img_ids.numel() == len(img_metas)
-
-        bboxes_list = []
-        for i in range(len(img_metas)):
-            inds = torch.nonzero(rois[:, 0] == i).squeeze()
-            num_rois = inds.numel()
-
-            bboxes_ = rois[inds, 1:]
-            label_ = labels[inds]
-            bbox_pred_ = bbox_preds[inds]
-            img_meta_ = img_metas[i]
-            pos_is_gts_ = pos_is_gts[i]
-
-            bboxes = self.regress_by_class1(bboxes_, label_, bbox_pred_,
-                                           img_meta_)
-            # filter gt bboxes
-            pos_keep = 1 - pos_is_gts_
-            keep_inds = pos_is_gts_.new_ones(num_rois)
-            keep_inds[:len(pos_is_gts_)] = pos_keep
-
-            bboxes_list.append(bboxes[keep_inds])
-
-        return bboxes_list
-
-    @force_fp32(apply_to=('bbox_pred',))
-    def regress_by_class1(self, rois, label, bbox_pred, img_meta):
-        """Regress the bbox for the predicted class. Used in Cascade R-CNN.
-        Args:
-            rois (Tensor): shape (n, 5) or (n, 6)
-            label (Tensor): shape (n, )
-            bbox_pred (Tensor): shape (n, 5*(#class+1)) or (n, 5)
-            img_meta (dict): Image meta info.
-        Returns:
-            Tensor: Regressed bboxes, the same shape as input rois.
-        """
-        # assert rois.size(1) == 5 or rois.size(1) == 6
-
-        if not self.reg_class_agnostic:
-            label = label * 5
-            inds = torch.stack((label, label + 1, label + 2, label + 3, label + 4), 1)
-            bbox_pred = torch.gather(bbox_pred, 1, inds)
-        assert bbox_pred.size(1) == 5
-
-        if rois.size(1) == 5:
-            new_rois = delta2bbox_rotated(rois, bbox_pred, self.means,
-                                          self.stds, img_meta['img_shape'])
-        else:
-            bboxes = delta2bbox_rotated(rois[:, 1:], bbox_pred, self.means,
-                                        self.stds, img_meta['img_shape'])
-            new_rois = torch.cat((rois[:, [0]], bboxes), dim=1)
-
-        return new_rois
-
     @force_fp32(apply_to=('bbox_preds', ))
     def refine_bboxes(self, rois, labels, bbox_preds, pos_is_gts, img_metas):
         """Refine bboxes during training.
+
         Args:
             rois (torch.Tensor): Shape (n*bs, 5), where n is image number per
                 GPU, and bs is the sampled RoIs per image. The first column is
@@ -602,6 +432,7 @@ class RotatedBBoxHead(BaseModule):
             pos_is_gts (list[Tensor]): Flags indicating if each positive bbox
                 is a gt bbox.
             img_metas (list[dict]): Meta info of each image.
+
         Returns:
             list[Tensor]: Refined bboxes of each image in a mini-batch.
         """
@@ -635,11 +466,13 @@ class RotatedBBoxHead(BaseModule):
     @force_fp32(apply_to=('bbox_pred', ))
     def regress_by_class(self, rois, label, bbox_pred, img_meta):
         """Regress the bbox for the predicted class. Used in Cascade R-CNN.
+
         Args:
             rois (torch.Tensor): shape (n, 4) or (n, 5)
             label (torch.Tensor): shape (n, )
             bbox_pred (torch.Tensor): shape (n, 5*(#class)) or (n, 5)
             img_meta (dict): Image meta info.
+
         Returns:
             Tensor: Regressed bboxes, the same shape as input rois.
         """

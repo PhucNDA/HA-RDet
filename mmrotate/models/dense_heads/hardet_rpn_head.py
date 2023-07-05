@@ -72,7 +72,7 @@ class AlignConv(BaseModule):
 
 
 @HEADS.register_module()
-class HybridAlignRPNHead(RotatedRPNHead):
+class StageAlignRPNHead(RotatedRPNHead):
     """Stage of CascadeRPNHead.
     Args:
         in_channels (int): Number of channels in the input feature map.
@@ -108,7 +108,7 @@ class HybridAlignRPNHead(RotatedRPNHead):
         self.mapping_gt = None
         self.pos_inds = None
         self.rev = None
-        super(HybridAlignRPNHead, self).__init__(
+        super(StageAlignRPNHead, self).__init__(
             in_channels,
             anchor_generator=anchor_generator,
             init_cfg=init_cfg,
@@ -358,7 +358,7 @@ class HybridAlignRPNHead(RotatedRPNHead):
                 gt_bboxes_ignore_list=gt_bboxes_ignore,
                 label_channels=label_channels)
         else:
-            cls_reg_targets = super(HybridAlignRPNHead, self).get_targets(
+            cls_reg_targets = super(StageAlignRPNHead, self).get_targets(
                 anchor_list,
                 valid_flag_list,
                 gt_bboxes,
@@ -892,7 +892,7 @@ class HybridAlignRPNHead(RotatedRPNHead):
 
 
 @HEADS.register_module()
-class HybridCascadeAlignRPNHead(BaseDenseHead):
+class HybridAnchorRPNHead(BaseDenseHead):
     """The CascadeRPNHead will predict more accurate region proposals, which is
     required for two-stage detectors (such as Fast/Faster R-CNN). CascadeRPN
     consists of a sequence of RPNStage to progressively improve the accuracy of
@@ -906,7 +906,7 @@ class HybridCascadeAlignRPNHead(BaseDenseHead):
     """
 
     def __init__(self, num_stages, stages, train_cfg, test_cfg, init_cfg=None):
-        super(HybridCascadeAlignRPNHead, self).__init__(init_cfg)
+        super(HybridAnchorRPNHead, self).__init__(init_cfg)
         assert num_stages == len(stages)
         self.num_stages = num_stages
         # Be careful! Pretrained weights cannot be loaded when use
@@ -937,7 +937,7 @@ class HybridCascadeAlignRPNHead(BaseDenseHead):
                       proposal_cfg=None):
         """Forward train function."""
         assert gt_labels is None, 'RPN does not require gt_labels'
-
+        # breakpoint()
         featmap_sizes = [featmap.size()[-2:] for featmap in x]
         device = x[0].device
         anchor_list, valid_flag_list = self.stages[0].get_anchors(

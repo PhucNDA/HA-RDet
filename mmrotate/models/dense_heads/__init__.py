@@ -5,7 +5,7 @@ from .kfiou_odm_refine_head import KFIoUODMRefineHead
 from .kfiou_rotate_retina_head import KFIoURRetinaHead
 from .kfiou_rotate_retina_refine_head import KFIoURRetinaRefineHead
 from .odm_refine_head import ODMRefineHead
-# from .oriented_reppoints_head import OrientedRepPointsHead
+from .oriented_reppoints_head import OrientedRepPointsHead
 from .oriented_rpn_head import OrientedRPNHead
 from .rotated_anchor_free_head import RotatedAnchorFreeHead
 from .rotated_anchor_head import RotatedAnchorHead
@@ -16,19 +16,12 @@ from .rotated_retina_head import RotatedRetinaHead
 from .rotated_retina_refine_head import RotatedRetinaRefineHead
 from .rotated_rpn_head import RotatedRPNHead
 from .sam_reppoints_head import SAMRepPointsHead
-from .AlignmentRPN import AlignmentRPNHead, StageAlignmentRPNHead
-from .align_rpn_head import StageAlignRPNHead, CascadeAlignRPNHead
-from .orientation_sense_rpn import Orientation1, Orientation2, OrientationSensitiveHead
-from .ropn_head import OrientationSenseStage1, OrientationSenseStage2, RoPNHead
-from .hybrid_anchor_align_rpn_head import HybridAlignRPNHead, HybridCascadeAlignRPNHead
+
 __all__ = [
     'RotatedAnchorHead', 'RotatedRetinaHead', 'RotatedRPNHead',
     'OrientedRPNHead', 'RotatedRetinaRefineHead', 'ODMRefineHead',
     'KFIoURRetinaHead', 'KFIoURRetinaRefineHead', 'KFIoUODMRefineHead',
     'RotatedRepPointsHead', 'SAMRepPointsHead', 'CSLRRetinaHead',
     'RotatedATSSHead', 'RotatedAnchorFreeHead', 'RotatedFCOSHead',
-    'CSLRFCOSHead', 'AlignmentRPNHead', 'StageAlignmentRPNHead', 'StageAlignRPNHead', 'CascadeAlignRPNHead',
-    'Orientation1', 'Orientation2', 'OrientationSensitiveHead',
-    'OrientationSenseStage1', 'OrientationSenseStage2', 'RoPNHead',
-    'HybridAlignRPNHead', 'HybridCascadeAlignRPNHead'
+    'CSLRFCOSHead', 'OrientedRepPointsHead'
 ]

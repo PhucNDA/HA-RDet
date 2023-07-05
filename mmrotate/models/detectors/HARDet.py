@@ -23,3 +23,4 @@ class HARDet(RotatedTwoStageDetector):
             test_cfg=test_cfg,
             pretrained=pretrained,
             init_cfg=init_cfg)
+        

@@ -12,10 +12,10 @@ from .rotated_retinanet import RotatedRetinaNet
 from .s2anet import S2ANet
 from .single_stage import RotatedSingleStageDetector
 from .two_stage import RotatedTwoStageDetector
-from .HARDet import HARDet
+
 __all__ = [
     'RotatedRetinaNet', 'RotatedFasterRCNN', 'OrientedRCNN', 'RoITransformer',
     'GlidingVertex', 'ReDet', 'R3Det', 'S2ANet', 'RotatedRepPoints',
     'RotatedBaseDetector', 'RotatedTwoStageDetector',
-    'RotatedSingleStageDetector', 'RotatedFCOS', 'HARDet'
+    'RotatedSingleStageDetector', 'RotatedFCOS'
 ]
