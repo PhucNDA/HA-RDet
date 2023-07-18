@@ -43,7 +43,7 @@ MMRotate depends on <a href="https://pytorch.org/">PyTorch</a>, <a href="https:/
 * Git clone
 
 ```
-git clone https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector 
+git clone https://github.com/PhucNDA/HA-RDet
 ```
 
 * Environment setup
