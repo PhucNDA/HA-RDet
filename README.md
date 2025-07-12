@@ -3,7 +3,7 @@
   # Hybrid-Anchor Rotation Detector for Oriented Object Detection - ICCV'25 (SEA)
 </div>
 
-![image]((https://github.com/HA-RDet/images/hardet_architecture.png))
+![image](((https://github.com/PhucNDA/HA-RDet/blob/main/images/hardet_architecture.png)))
 
 ## Introduction
 
