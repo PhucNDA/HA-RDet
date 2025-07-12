@@ -1,13 +1,13 @@
 <div align="center">
 
-  # Hybrid-Anchor Rotation Detector for Oriented Object Detection
+  # Hybrid-Anchor Rotation Detector for Oriented Object Detection - ICCV'25 (SEA)
 </div>
 
-![image](https://github.com/HiImKing1509/Hybrid-Anchor-Rotation-Detector/blob/master/images/hardet_architecture.png)
+![image]((https://github.com/HA-RDet/images/hardet_architecture.png))
 
 ## Introduction
 
-Oriented object detection in aerial images involves identifying objects with varying sizes and orientations, gaining significant attention in computer vision and pattern recognition. Current state-of-the-art detectors use either two-stage or one-stage approaches and commonly adopt Anchor-based strategies. These methods require a redundant number of generated anchors for training and could be inefficient for the limited computational resources. In contrast, Anchor-free mechanisms are faster processing times by eliminating the need for anchor-related hyperparameters. However, they significantly diminish the number of training samples, excoriating the detection accuracy. To address these limitations, we present a **Hybrid-Anchor Rotation Detector (HA-RDet)** that combines the advantages of both anchor-based and anchor-free schemes for oriented object detection. Our approach utilizes only one preset anchor for each location on the feature maps and refines these anchors using our introduced Orientation-Aware Convolution technique, significantly boosting the detection performance of HA-RDet. We extensively evaluate HA-RDet with ResNet50 on challenging benchmarks and achieve competitive accuracies, such as DOTA-v1 (75.41% mAP), DIOR-R (65.3% mAP), and HRSC2016 (90.2% mAP) against current anchor-based methods while utilizing fewer training resources. We hope our baseline could establish a foundation for further advancements in oriented object detection.
+Oriented object detection in aerial images poses a significant challenge due to their varying sizes and orientations. Current state-of-the-art detectors typically rely on either two-stage or one-stage approaches, often employing Anchor-based strategies, which can result in computationally expensive operations due to the redundant number of generated anchors during training. In contrast, Anchor-free mechanisms offer faster processing but suffer from a reduction in the number of training samples, potentially impacting detection accuracy. To address these limitations, we propose the Hybrid-Anchor Rotation Detector (HA-RDet), which combines the advantages of both anchor-based and anchor-free schemes for oriented object detection. By utilizing only one preset anchor for each location on the feature maps and refining these anchors with our Orientation-Aware Convolution technique, HA-RDet achieves competitive accuracies, including 75.41 mAP on DOTA-v1, 65.3 mAP on DIOR-R, and 90.2 mAP on HRSC2016, against current anchor-based state-of-the-art methods, while significantly reducing computational resources.
 
 ## Installation
 
