@@ -3,6 +3,8 @@
   # Hybrid-Anchor Rotation Detector for Oriented Object Detection - [ICCV'25 (SEA)](https://www.linkedin.com/posts/phucnda_iccv2025-deeplearning-computervision-activity-7349386783173812224-nZHk?utm_source=share&utm_medium=member_desktop&rcm=ACoAADbLioEBJomPC4X7mN_v9mBOCit95xQySik)
 </div>
 
+# [Project Page](https://phucnda.github.io/blog/hardet/index.html)
+
 ![image](https://github.com/PhucNDA/HA-RDet/blob/main/images/hardet_architecture.png)
 
 <a href="https://arxiv.org/abs/2412.14379"><img src="https://img.shields.io/badge/arxiv-2412.14379-red?style=for-the-badge"></a>
